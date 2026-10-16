@@ -581,13 +581,11 @@ body {
 .solar-system {
     position: relative;
     width: 100%;
-    height: 550px;
-    /* Ditinggikan agar muat kartu yang membesar */
+    height: 500px;
     display: flex;
     justify-content: center;
     align-items: center;
-    perspective: 1500px;
-    /* Diperbesar agar efek 3D tetap proporsional */
+    perspective: 1400px;
     overflow: visible;
     margin-top: 20px;
 }
@@ -595,10 +593,8 @@ body {
 /* Lintasan Orbit yang Berputar */
 .orbit-track {
     position: absolute;
-    width: 220px;
-    /* Lebar foto DIPERBESAR (sebelumnya 180px) */
-    height: 330px;
-    /* Tinggi foto DIPERBESAR (sebelumnya 270px) */
+    width: 195px;
+    height: 295px;
     transform-style: preserve-3d;
     animation: spin-orbit 25s linear infinite;
     z-index: 1;
@@ -667,25 +663,25 @@ body {
     text-shadow: none;
 }
 
-/* Jarak Orbit DIPERBESAR (TranslateZ) agar kartu tidak berdempetan */
+/* Jarak Orbit lebih rapat namun tidak terlalu mepet */
 .item1 {
-    transform: rotateY(0deg) translateZ(340px);
+    transform: rotateY(0deg) translateZ(290px);
 }
 
 .item2 {
-    transform: rotateY(72deg) translateZ(340px);
+    transform: rotateY(72deg) translateZ(290px);
 }
 
 .item3 {
-    transform: rotateY(144deg) translateZ(340px);
+    transform: rotateY(144deg) translateZ(290px);
 }
 
 .item4 {
-    transform: rotateY(216deg) translateZ(340px);
+    transform: rotateY(216deg) translateZ(290px);
 }
 
 .item5 {
-    transform: rotateY(288deg) translateZ(340px);
+    transform: rotateY(288deg) translateZ(290px);
 }
 
 /* =========================================
@@ -1221,13 +1217,23 @@ body {
 
     /* --- 2. OPTIMASI FROSTED GLASS & BLUR COMPOSITING DI MOBILE --- */
     /* Mengganti backdrop-filter blur tinggi (14px-18px) dengan blur ringan (4px-6px) & background solid */
-    .glass-panel,
-    .photo-panel {
+    .glass-panel {
         background: rgba(255, 255, 255, 0.90) !important;
         backdrop-filter: blur(6px) !important;
         -webkit-backdrop-filter: blur(6px) !important;
         box-shadow: 0 8px 24px rgba(0, 45, 80, 0.12) !important;
         padding: 25px 20px;
+        margin-bottom: 50px;
+    }
+
+    /* Panel foto (The little things, Candid Pict, & Polaroid) tetap transparan tanpa kotak background */
+    .photo-panel {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        padding: 15px 0 !important;
         margin-bottom: 50px;
     }
 
@@ -1271,14 +1277,14 @@ body {
 
     /* --- 3. OPTIMASI KAROUSEL 3D (TENTANGMU) DI MOBILE --- */
     .solar-system {
-        height: 450px;
+        height: 400px;
         perspective: 1000px !important;
         contain: layout paint;
     }
 
     .orbit-track {
-        width: 180px;
-        height: 270px;
+        width: 155px;
+        height: 235px;
         transform-style: preserve-3d;
         will-change: transform;
     }
@@ -1291,31 +1297,37 @@ body {
         backface-visibility: hidden !important;
         -webkit-backface-visibility: hidden !important;
         transform: translateZ(0);
+        padding: 10px 10px 12px 10px !important;
+        border-radius: 14px !important;
+    }
+
+    .planet-card img {
+        margin-bottom: 8px;
     }
 
     .planet-caption {
-        font-size: 0.95rem;
+        font-size: 0.82rem;
     }
 
-    /* Menyesuaikan jarak orbit di HP */
+    /* Menyesuaikan jarak orbit di HP (lebih rapat namun tidak mepet) */
     .item1 {
-        transform: rotateY(0deg) translateZ(200px);
+        transform: rotateY(0deg) translateZ(168px);
     }
 
     .item2 {
-        transform: rotateY(72deg) translateZ(200px);
+        transform: rotateY(72deg) translateZ(168px);
     }
 
     .item3 {
-        transform: rotateY(144deg) translateZ(200px);
+        transform: rotateY(144deg) translateZ(168px);
     }
 
     .item4 {
-        transform: rotateY(216deg) translateZ(200px);
+        transform: rotateY(216deg) translateZ(168px);
     }
 
     .item5 {
-        transform: rotateY(288deg) translateZ(200px);
+        transform: rotateY(288deg) translateZ(168px);
     }
 
     /* --- 4. TATA LETAK & KONTEN DI HP --- */

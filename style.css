@@ -8,7 +8,7 @@
 }
 
 html {
-    overflow-x: hidden;
+    overflow-x: clip;
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
 }
@@ -17,13 +17,14 @@ body {
     font-family: 'Outfit', sans-serif;
     background: #3ebcd9;
     color: #0e293f;
-    overflow-x: hidden;
+    overflow-x: clip;
     min-height: 100vh;
     min-height: 100dvh;
     width: 100%;
     max-width: 100vw;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     position: relative;
+    -webkit-overflow-scrolling: touch;
 }
 
 .aesthetic-font {
@@ -601,6 +602,7 @@ body {
     transform-style: preserve-3d;
     animation: spin-orbit 25s linear infinite;
     z-index: 1;
+    will-change: transform;
 }
 
 .orbit-track:hover {
@@ -637,6 +639,9 @@ body {
     box-shadow: 0 10px 30px rgba(0, 45, 80, 0.2);
     transition: border-color 0.3s, box-shadow 0.3s;
     cursor: pointer;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
 .planet-card:hover {
@@ -1191,19 +1196,101 @@ body {
 /* =========================================
    PENYESUAIAN MOBILE (Tampilan Layar HP)
 ========================================= */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
 
-    /* =========================================
-       PENYESUAIAN MOBILE UNTUK KAROUSEL 3D
-    ========================================= */
+    /* --- 1. OPTIMASI WATER BACKGROUND SYSTEM DI MOBILE --- */
+    .water-bg-base {
+        filter: none !important; /* MATIKAN filter SVG feTurbulence & displacement map pada mobile agar GPU tidak drop FPS */
+        transform: translate3d(0, 0, 0) !important;
+        will-change: transform;
+    }
+
+    .water-bg-caustic-layer {
+        mix-blend-mode: normal !important; /* Hapus overlay blend mode yang berat di GPU mobile */
+        opacity: 0.22 !important;
+        animation: none !important; /* Hentikan animasi ganda fullscreen yang membebani compositor */
+        transform: none !important;
+        will-change: auto;
+    }
+
+    .water-bg-shimmer {
+        mix-blend-mode: normal !important;
+        opacity: 0.3 !important;
+        animation: none !important;
+    }
+
+    /* --- 2. OPTIMASI FROSTED GLASS & BLUR COMPOSITING DI MOBILE --- */
+    /* Mengganti backdrop-filter blur tinggi (14px-18px) dengan blur ringan (4px-6px) & background solid */
+    .glass-panel,
+    .photo-panel {
+        background: rgba(255, 255, 255, 0.90) !important;
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
+        box-shadow: 0 8px 24px rgba(0, 45, 80, 0.12) !important;
+        padding: 25px 20px;
+        margin-bottom: 50px;
+    }
+
+    .glass-title {
+        background: rgba(255, 255, 255, 0.92) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        box-shadow: 0 4px 15px rgba(0, 40, 75, 0.12) !important;
+    }
+
+    .pin-container {
+        background: rgba(255, 255, 255, 0.92) !important;
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
+        box-shadow: 0 10px 30px rgba(0, 45, 80, 0.15) !important;
+    }
+
+    .pin-popup-overlay {
+        background: rgba(8, 28, 50, 0.85) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    #image-modal {
+        background: rgba(0, 0, 0, 0.88) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .candle-page {
+        background: radial-gradient(ellipse at center bottom, rgba(12, 35, 60, 0.97) 0%, rgba(4, 15, 30, 0.99) 100%) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .btn-back-candle {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    /* --- 3. OPTIMASI KAROUSEL 3D (TENTANGMU) DI MOBILE --- */
     .solar-system {
         height: 450px;
+        perspective: 1000px !important;
+        contain: layout paint;
     }
 
     .orbit-track {
         width: 180px;
-        /* Ukuran HP juga ikut diperbesar */
         height: 270px;
+        transform-style: preserve-3d;
+        will-change: transform;
+    }
+
+    .planet-card {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: none !important; /* SANGAT KRUSIAL: matikan blur pada 5 kartu 3D yang berputar agar 60 FPS */
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 6px 18px rgba(0, 45, 80, 0.16) !important;
+        backface-visibility: hidden !important;
+        -webkit-backface-visibility: hidden !important;
+        transform: translateZ(0);
     }
 
     .planet-caption {
@@ -1231,14 +1318,9 @@ body {
         transform: rotateY(288deg) translateZ(200px);
     }
 
+    /* --- 4. TATA LETAK & KONTEN DI HP --- */
     #main-content {
         padding: 30px 15px;
-    }
-
-    .glass-panel,
-    .photo-panel {
-        padding: 25px 20px;
-        margin-bottom: 50px;
     }
 
     .aesthetic-font {
@@ -1258,30 +1340,38 @@ body {
         font-size: 0.7rem;
     }
 
+    .birthday-photo {
+        filter: drop-shadow(0 4px 12px rgba(255, 182, 193, 0.4)) !important;
+        will-change: transform;
+    }
+
     .polaroid-grid {
         grid-template-columns: repeat(2, 1fr);
-        /* Memaksa agar tetap 2 ke samping di HP */
         gap: 10px;
-        /* Jarak antar foto sedikit dirapatkan */
     }
 
     .polaroid {
         padding: 8px 8px 15px 8px;
-        /* Bingkai putih polaroid sedikit dikecilkan */
+        box-shadow: 0 6px 15px rgba(0, 35, 65, 0.15) !important;
+        transform: translateZ(0);
     }
 
     .polaroid .caption {
         font-size: 1.1rem;
-        /* Ukuran tulisan di bawah foto dikecilkan agar muat dan rapi */
     }
 
-
+    .scratch-card {
+        transform: translateZ(0);
+    }
 
     .music-popup {
         bottom: 20px;
         left: -100%;
         width: 110px;
         padding: 20px 10px 10px 10px;
+        background: rgba(10, 36, 64, 0.94) !important;
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
     }
 
     .music-popup.show-music {
@@ -1295,6 +1385,17 @@ body {
 
     .song-title-text {
         font-size: 0.8rem;
+    }
+
+    .show-music-btn {
+        top: 50%;
+        transform: translateY(-50%);
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+    }
+
+    .show-music-btn.show-btn {
+        left: 0;
     }
 }
 
@@ -1349,17 +1450,6 @@ body {
 .show-music-btn:hover {
     width: 45px;
     /* Memanjang saat disorot / disentuh */
-}
-
-@media (max-width: 600px) {
-    .show-music-btn {
-        top: 50%;
-        transform: translateY(-50%);
-    }
-
-    .show-music-btn.show-btn {
-        left: 0;
-    }
 }
 
 /* =========================================

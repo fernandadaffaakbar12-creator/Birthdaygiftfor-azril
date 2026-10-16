@@ -10,6 +10,8 @@
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window && window.innerWidth <= 1024);
+
         let width = 0;
         let height = 0;
         let dpr = 1;
@@ -19,7 +21,7 @@
 
         // Kumpulan riak air interaktif (interaksi klik / sentuh)
         const ripples = [];
-        const MAX_RIPPLES = 12;
+        const MAX_RIPPLES = isMobile ? 4 : 12;
 
         // Kumpulan kilauan cahaya matahari (water sparkles / glints)
         let sparkles = [];
@@ -32,7 +34,8 @@
         let nextIdleDropTime = performance.now() + 3000;
 
         function resize() {
-            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            // Pada HP, gunakan DPR 1 untuk mencegah pemborosan GPU dan overheating
+            dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
             width = window.innerWidth;
             height = window.innerHeight;
             canvas.width = Math.round(width * dpr);
@@ -48,19 +51,20 @@
         // Membuat konfigurasi pita gelombang kaustik air santai
         function generateWaveRibbons() {
             waveRibbons = [];
-            const count = Math.min(Math.max(Math.floor(height / 85), 8), 16);
+            // Di HP kurangi jumlah pita agar render tetap super ringan
+            const count = isMobile ? 4 : Math.min(Math.max(Math.floor(height / 85), 8), 16);
             for (let i = 0; i < count; i++) {
                 waveRibbons.push({
                     baseY: (height / (count + 1)) * (i + 1) + (Math.random() - 0.5) * 40,
-                    amplitude: 8 + Math.random() * 12,
+                    amplitude: isMobile ? 6 + Math.random() * 8 : 8 + Math.random() * 12,
                     frequency: 0.003 + Math.random() * 0.003,
                     speed: 0.0006 + Math.random() * 0.0005,
                     phase: Math.random() * Math.PI * 2,
-                    lineWidth: 1.2 + Math.random() * 1.8,
+                    lineWidth: isMobile ? 1.0 + Math.random() * 1.2 : 1.2 + Math.random() * 1.8,
                     alpha: 0.12 + Math.random() * 0.14,
-                    // Warna bias spektrum pelangi lembut (matching foto lampiran)
+                    // Warna bias spektrum pelangi lembut
                     hueOffset: Math.random() * 30 - 15,
-                    iridescent: i % 3 === 0
+                    iridescent: i % 2 === 0
                 });
             }
         }
@@ -68,7 +72,8 @@
         // Membuat kilauan pantulan cahaya matahari pada puncak gelombang
         function generateSparkles() {
             sparkles = [];
-            const count = Math.min(Math.max(Math.floor((width * height) / 22000), 22), 48);
+            // Di HP cukup 12 sparkles, di desktop 22-48
+            const count = isMobile ? 12 : Math.min(Math.max(Math.floor((width * height) / 22000), 22), 48);
             for (let i = 0; i < count; i++) {
                 sparkles.push({
                     x: Math.random() * width,
@@ -80,7 +85,6 @@
                     phase: Math.random() * Math.PI * 2,
                     rotation: Math.random() * Math.PI,
                     rotSpeed: (Math.random() - 0.5) * 0.004,
-                    // Sedikit bias pelangi (merah muda, cyan, emas lembut)
                     type: Math.random() < 0.35 ? 'iridescent' : 'pure'
                 });
             }
@@ -106,29 +110,40 @@
 
         // Listener interaksi sentuh / klik / gerak cursor
         let lastMove = 0;
+        let lastClickTime = 0;
         function handlePointer(e) {
             const now = performance.now();
             const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : null);
             const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : null);
             if (clientX === null || clientY === null) return;
 
-            // Throttle untuk pergerakan halus (efek wake ripple santai)
-            if (now - lastMove > 180) {
+            // Throttle lebih hemat di mobile (300ms) vs desktop (180ms)
+            const throttleMs = isMobile ? 300 : 180;
+            if (now - lastMove > throttleMs) {
                 addRipple(clientX, clientY, 0.45);
                 lastMove = now;
             }
         }
 
         function handleClick(e) {
+            const now = performance.now();
+            // Mencegah double trigger dari pointerdown + touchstart
+            if (now - lastClickTime < 150) return;
+            lastClickTime = now;
+
             const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : null);
             const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : null);
             if (clientX === null || clientY === null) return;
-            addRipple(clientX, clientY, 0.9);
+            addRipple(clientX, clientY, 0.85);
         }
 
-        window.addEventListener('pointermove', handlePointer, { passive: true });
-        window.addEventListener('pointerdown', handleClick, { passive: true });
-        window.addEventListener('touchstart', handleClick, { passive: true });
+        if (window.PointerEvent) {
+            window.addEventListener('pointermove', handlePointer, { passive: true });
+            window.addEventListener('pointerdown', handleClick, { passive: true });
+        } else {
+            window.addEventListener('mousemove', handlePointer, { passive: true });
+            window.addEventListener('touchstart', handleClick, { passive: true });
+        }
 
         // Menggambar kilauan 4-point star kristal matahari di permukaan air
         function drawSparkle(x, y, size, alpha, rotation, isIridescent) {
@@ -139,11 +154,9 @@
             let strokeColor = `rgba(255, 255, 255, ${alpha})`;
             let coreColor = `rgba(255, 255, 255, ${alpha * 0.9})`;
             if (isIridescent) {
-                // Bias warna pelangi lembut khas refraksi air
                 coreColor = `rgba(255, 220, 245, ${alpha * 0.85})`;
             }
 
-            // Sayap vertikal & horizontal
             const len = size * 2.6;
             const w = size * 0.35;
 
@@ -160,7 +173,6 @@
             ctx.quadraticCurveTo(0, -w, -len, 0);
             ctx.fill();
 
-            // Inti kilau
             ctx.beginPath();
             ctx.arc(0, 0, size * 0.65, 0, Math.PI * 2);
             ctx.fillStyle = strokeColor;
@@ -169,14 +181,35 @@
             ctx.restore();
         }
 
+        // Elemen overlay layar penuh yang menutupi background
+        const candlePageEl = document.getElementById('candle-page');
+        const modalEl = document.getElementById('image-modal');
+        let lastRenderTime = 0;
+        const targetFpsInterval = isMobile ? 1000 / 45 : 0; // ~45 FPS di HP untuk penghematan daya & bebas jank
+
         // Render loop
         function render(time) {
-            const delta = time - lastTime;
-            lastTime = time;
+            animationFrameId = requestAnimationFrame(render);
+
+            // Jika lilin atau modal sedang tampil penuh di layar, hemat GPU dengan skip render background
+            if ((candlePageEl && candlePageEl.classList.contains('active')) ||
+                (modalEl && modalEl.classList.contains('show-modal'))) {
+                return;
+            }
+
+            // Pacing frame rate di mobile agar GPU dingin dan scrolling tidak tersendat
+            if (isMobile && targetFpsInterval > 0) {
+                if (time - lastRenderTime < targetFpsInterval) {
+                    return;
+                }
+            }
+            const delta = time - (lastRenderTime || time);
+            lastRenderTime = time;
 
             ctx.clearRect(0, 0, width, height);
 
             // 1. Gambar pita gelombang kaustik air (Flowing Sunlight Caustics Ribbons)
+            const step = isMobile ? 36 : 20;
             for (let i = 0; i < waveRibbons.length; i++) {
                 const w = waveRibbons[i];
                 ctx.save();
@@ -200,8 +233,6 @@
                 ctx.lineWidth = w.lineWidth;
                 ctx.lineCap = 'round';
 
-                // Garis bergelombang santai menggunakan kombinasi sinus halus
-                const step = 20;
                 let started = false;
                 for (let x = -20; x <= width + 20; x += step) {
                     const wave1 = Math.sin(x * w.frequency + t) * w.amplitude;
@@ -244,7 +275,6 @@
                     continue;
                 }
 
-                // Cincin terang utama
                 ctx.save();
                 ctx.beginPath();
                 ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
@@ -252,7 +282,6 @@
                 ctx.lineWidth = r.width;
                 ctx.stroke();
 
-                // Cincin sekunder luar (bias air lembut)
                 if (r.radius > 12) {
                     ctx.beginPath();
                     ctx.arc(r.x, r.y, r.radius * 0.82, 0, Math.PI * 2);
@@ -269,24 +298,22 @@
                 const dropX = width * (0.2 + Math.random() * 0.6);
                 const dropY = height * (0.2 + Math.random() * 0.6);
                 addRipple(dropX, dropY, 0.55);
-                nextIdleDropTime = time + 4200 + Math.random() * 2500;
+                nextIdleDropTime = time + (isMobile ? 5500 : 4200) + Math.random() * 2500;
             }
 
-            // 5. Animasi halus frekuensi gelombang pada SVG displacement filter
-            if (turbulenceEl) {
-                // Pergeseran super santai pada baseFrequency membuat texture air bergelombang hidup secara organik
+            // 5. Animasi halus frekuensi gelombang pada SVG displacement filter (HANYA DESKTOP)
+            // Di HP atribut SVG feTurbulence tidak diupdate per frame agar rendering GPU tidak stutter
+            if (turbulenceEl && !isMobile) {
                 const freqX = 0.012 + Math.sin(time * 0.0006) * 0.0025;
                 const freqY = 0.020 + Math.cos(time * 0.0005) * 0.003;
                 turbulenceEl.setAttribute('baseFrequency', `${freqX.toFixed(5)} ${freqY.toFixed(5)}`);
             }
-
-            animationFrameId = requestAnimationFrame(render);
         }
 
         let resizeTimeout = null;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(resize, 120);
+            resizeTimeout = setTimeout(resize, 150);
         });
 
         document.addEventListener('visibilitychange', () => {
@@ -297,6 +324,7 @@
                 }
             } else {
                 lastTime = performance.now();
+                lastRenderTime = performance.now();
                 if (!animationFrameId) {
                     animationFrameId = requestAnimationFrame(render);
                 }
@@ -318,7 +346,8 @@
 // 0. ANIMASI LOADING "I LOVE YOU" MEMBENTUK HATI
 // ==========================================
 (function () {
-    const PARTICLE_COUNT = 80;
+    const isMobileLoading = window.innerWidth <= 768;
+    const PARTICLE_COUNT = isMobileLoading ? 48 : 80;
     const LOVE_TEXTS = ['I love you', 'i love u', 'love', 'ily', '♡', 'luv u', 'sayang', 'cinta'];
 
     // Parametric heart shape formula
@@ -468,6 +497,7 @@
             // Phase C: Show PIN screen instead of landing page
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
+                container.innerHTML = ''; // Bebaskan elemen DOM partikel untuk hemat memori HP
                 const pinScreen = document.getElementById('pin-screen');
                 if (pinScreen) {
                     pinScreen.style.display = 'flex';
@@ -835,8 +865,10 @@ function buatHujanBunga() {
     if (!container) return;
 
     const bungaPilihan = ['🌸', '🌺', '🌷', '✨', '💖'];
+    const isMobile = window.innerWidth <= 768;
+    const petalCount = isMobile ? 22 : 40;
 
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < petalCount; i++) {
         const petal = document.createElement('div');
         petal.classList.add('petal');
 
@@ -1002,16 +1034,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearedSet = new Set();
     let galleryUnlocked = false;
 
+    let sliderRaf = null;
     function updateSlider() {
         if (!gallerySliderThumb || !galleryScroll) return;
-        const maxScroll = galleryScroll.scrollWidth - galleryScroll.clientWidth;
-        if (maxScroll > 0) {
-            const scrollPercent = galleryScroll.scrollLeft / maxScroll;
-            const trackWidth = gallerySliderThumb.parentElement.clientWidth;
-            const thumbWidth = gallerySliderThumb.clientWidth;
-            const maxLeft = trackWidth - thumbWidth;
-            gallerySliderThumb.style.left = (scrollPercent * maxLeft) + 'px';
-        }
+        if (sliderRaf) return;
+        sliderRaf = requestAnimationFrame(() => {
+            const maxScroll = galleryScroll.scrollWidth - galleryScroll.clientWidth;
+            if (maxScroll > 0) {
+                const scrollPercent = galleryScroll.scrollLeft / maxScroll;
+                const trackWidth = gallerySliderThumb.parentElement.clientWidth;
+                const thumbWidth = gallerySliderThumb.clientWidth;
+                const maxLeft = trackWidth - thumbWidth;
+                gallerySliderThumb.style.left = (scrollPercent * maxLeft) + 'px';
+            }
+            sliderRaf = null;
+        });
     }
 
     function scrollToCard(cardIndex) {
@@ -1129,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let transparentCount = 0;
             let sampledCount = 0;
 
-            for (let i = 3; i < pixels.length; i += 8) {
+            for (let i = 3; i < pixels.length; i += 24) {
                 sampledCount++;
                 if (pixels[i] === 0) transparentCount++;
             }
@@ -1166,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     galleryScroll.style.overflowX = 'auto';
                     galleryScroll.style.touchAction = 'pan-x pan-y';
                     // Sync slider saat scroll bebas
-                    galleryScroll.addEventListener('scroll', updateSlider);
+                    galleryScroll.addEventListener('scroll', updateSlider, { passive: true });
                 }
                 if (galleryHint) {
                     galleryHint.textContent = 'Semua foto sudah terbuka! Geser kesamping untuk melihatnya';
@@ -1186,6 +1223,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let isDrawing = false;
         let brushRadius = 25;
         let drawMoveCount = 0;
+        let cachedRect = null;
+        let scaleX = 1;
+        let scaleY = 1;
 
         setTimeout(() => {
             canvas.width = 220;
@@ -1193,14 +1233,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             paintWaterScratchCanvas(canvas, ctx, index);
 
+            const updateRect = () => {
+                cachedRect = canvas.getBoundingClientRect();
+                scaleX = canvas.width / (cachedRect.width || 1);
+                scaleY = canvas.height / (cachedRect.height || 1);
+            };
+
             const startPosition = (e) => {
                 isDrawing = true;
                 canvas._hasStartedScratching = true;
                 drawMoveCount = 0;
+                updateRect();
                 draw(e);
             };
 
             const endPosition = () => {
+                if (!isDrawing) return;
                 isDrawing = false;
                 ctx.beginPath();
                 // Cek setiap kali selesai menggosok
@@ -1211,7 +1259,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isDrawing) return;
 
                 let clientX, clientY;
-                if (e.type.includes('touch')) {
+                if (e.touches && e.touches[0]) {
                     clientX = e.touches[0].clientX;
                     clientY = e.touches[0].clientY;
                 } else {
@@ -1219,12 +1267,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     clientY = e.clientY;
                 }
 
-                const canvasRect = canvas.getBoundingClientRect();
-                // Scale koordinat dari ukuran tampilan CSS ke ukuran internal canvas
-                const scaleX = canvas.width / canvasRect.width;
-                const scaleY = canvas.height / canvasRect.height;
-                const x = (clientX - canvasRect.left) * scaleX;
-                const y = (clientY - canvasRect.top) * scaleY;
+                if (!cachedRect) updateRect();
+
+                const x = (clientX - cachedRect.left) * scaleX;
+                const y = (clientY - cachedRect.top) * scaleY;
 
                 ctx.lineWidth = brushRadius * 2;
                 ctx.lineCap = 'round';
@@ -1235,9 +1281,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 canvas._erasedStrokes = (canvas._erasedStrokes || 0) + 1;
 
-                // Juga cek selama menggosok setiap 15 gerakan
+                // Cek selama menggosok setiap 24 gerakan untuk menjaga FPS tetap 60
                 drawMoveCount++;
-                if (drawMoveCount % 15 === 0) {
+                if (drawMoveCount % 24 === 0) {
                     checkCanvasCleared(canvas, index);
                 }
             };
@@ -1366,7 +1412,9 @@ function hapusHoldListeners(candlePage) {
 }
 
 function buatSparkleBackground(container) {
-    for (let i = 0; i < 30; i++) {
+    const isMobileSparkle = window.innerWidth <= 768;
+    const sparkleCount = isMobileSparkle ? 12 : 30;
+    for (let i = 0; i < sparkleCount; i++) {
         const sparkle = document.createElement('div');
         sparkle.classList.add('candle-sparkle');
         sparkle.style.left = Math.random() * 100 + '%';
@@ -1626,12 +1674,13 @@ function buatConfetti() {
         }
     }
 
+    const isMobileConfetti = window.innerWidth <= 768;
     // Gelombang 1: Ledakan utama
-    burstWave(60, 0);
+    burstWave(isMobileConfetti ? 28 : 60, 0);
 
     // Gelombang 2: Ledakan kedua setelah 0.8 detik
-    setTimeout(() => burstWave(50, 0), 800);
+    setTimeout(() => burstWave(isMobileConfetti ? 22 : 50, 0), 800);
 
     // Gelombang 3: Hujan confetti lanjutan
-    setTimeout(() => burstWave(40, 0), 2000);
+    setTimeout(() => burstWave(isMobileConfetti ? 16 : 40, 0), 2000);
 }

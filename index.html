@@ -6,19 +6,21 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Happy Birthday Cintaku Azril!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
 </head>
 
 <body>
-    <audio id="bg-music" loop>
+    <audio id="bg-music" loop preload="none">
         <source src="audio/LANY - you! (Lyrics).mp3" type="audio/mpeg">
     </audio>
 
     <div id="music-popup" class="music-popup">
         <p class="now-playing-top">Now Playing</p>
-        <img src="img/5.jpeg" alt="Album Cover" class="album-cover">
+        <img src="img/5.jpeg" alt="Album Cover" class="album-cover" decoding="async">
         <div class="music-info">
             <div class="song-title-marquee">
                 <span class="song-title-text">You &nbsp;&nbsp;&nbsp;&nbsp;You&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -84,7 +86,7 @@
     <!-- Pop-Up Notifikasi PIN (Centered) -->
     <div id="pin-popup-overlay" class="pin-popup-overlay">
         <div id="pin-popup-box" class="pin-popup-box">
-            <img id="pin-popup-img" src="img/cat-warning.png" alt="Warning Cat" class="pin-popup-img">
+            <img id="pin-popup-img" src="img/cat-warning.png" alt="Warning Cat" class="pin-popup-img" decoding="async">
             <div class="pin-popup-emoji" id="pin-popup-emoji"></div>
             <p id="pin-popup-msg" class="pin-popup-msg"></p>
             <button class="pin-popup-close" id="pin-popup-close">Iya iya 😤</button>
@@ -93,7 +95,7 @@
 
     <div id="landing-page" style="display: none;">
         <div class="bouquet-container" onclick="bukaKado()">
-            <img src="img/BouquetBunga.png" alt="BouquetBunga" class="bouquet-img">
+            <img src="img/BouquetBunga.png" alt="BouquetBunga" class="bouquet-img" decoding="async">
             <p class="click-text">for u my luv<br>(pencet cukingnya) </p>
         </div>
     </div>
@@ -105,7 +107,7 @@
             <p class="aesthetic-font fade-in-text"
                 style="font-size: 1.3rem; color: #1a3e5c; margin-top: -5px; margin-bottom: 10px; letter-spacing: 2px;">-
                 Azril -</p>
-            <img src="img/foto-pacar.png" alt="Foto Pacar" class="birthday-photo fade-in-text">
+            <img src="img/foto-pacar.png" alt="Foto Pacar" class="birthday-photo fade-in-text" decoding="async">
             <p class="typing-text">selamat bertambah usia, cintaku. hari ini adalah tentang kamu, tentang semua kerja
                 kerasmu, tawa kamu, dan semua hal hebat yang sudah kamu lewati sampai detik ini.</p>
 
@@ -150,31 +152,31 @@
                 <div class="orbit-track">
 
                     <div class="planet-card item1" data-caption="Batagor">
-                        <img src="img/favorite-food.jpg" alt="Food">
+                        <img src="img/favorite-food.jpg" alt="Food" loading="lazy" decoding="async">
                         <p class="planet-caption">Your favorite food</p>
                     </div>
 
                     <div class="planet-card item2" data-caption="Es Teh">
-                        <img src="img/favorite-drink.jpg" alt="Drink">
+                        <img src="img/favorite-drink.jpg" alt="Drink" loading="lazy" decoding="async">
                         <p class="planet-caption">Your favorite drink</p>
                     </div>
 
                     <div class="planet-card item3"
                         data-embed="https://open.spotify.com/embed/track/4awLLAITdfA1nSoDvR4J9d?utm_source=generator&si=ae615b5e7b914182"
                         data-caption="Satu - Dewa 19">
-                        <img src="img/favorite-song.jpg" alt="Song">
+                        <img src="img/favorite-song.jpg" alt="Song" loading="lazy" decoding="async">
                         <p class="planet-caption">Your favorite song</p>
                     </div>
 
                     <div class="planet-card item4"
                         data-embed="https://www.youtube.com/embed/JyCUaWUvH08?si=9mZjEwMhF6xPeYa8"
                         data-caption="Dhot Design">
-                        <img src="img/favorite-yt.jpg" alt="YouTube Video">
+                        <img src="img/favorite-yt.jpg" alt="YouTube Video" loading="lazy" decoding="async">
                         <p class="planet-caption">Your favorite Youtube Channel</p>
                     </div>
 
                     <div class="planet-card item5" data-caption="Nayraa">
-                        <img src="img/favorite-person.jpeg" alt="Person">
+                        <img src="img/favorite-person.jpeg" alt="Person" loading="lazy" decoding="async">
                         <p class="planet-caption">Your favorite person</p>
                     </div>
 
@@ -192,27 +194,27 @@
             </h2>
             <div class="gallery-scroll">
                 <div class="scratch-card">
-                    <img src="img/1.jpeg" alt="Kenangan 1">
+                    <img src="img/1.jpeg" alt="Kenangan 1" loading="lazy" decoding="async">
                     <canvas class="scratch-canvas"></canvas>
                 </div>
                 <div class="scratch-card">
-                    <img src="img/2.jpeg" alt="Kenangan 2">
+                    <img src="img/2.jpeg" alt="Kenangan 2" loading="lazy" decoding="async">
                     <canvas class="scratch-canvas"></canvas>
                 </div>
                 <div class="scratch-card">
-                    <img src="img/3.jpeg" alt="Kenangan 3">
+                    <img src="img/3.jpeg" alt="Kenangan 3" loading="lazy" decoding="async">
                     <canvas class="scratch-canvas"></canvas>
                 </div>
                 <div class="scratch-card">
-                    <img src="img/4.jpeg" alt="Kenangan 4">
+                    <img src="img/4.jpeg" alt="Kenangan 4" loading="lazy" decoding="async">
                     <canvas class="scratch-canvas"></canvas>
                 </div>
                 <div class="scratch-card">
-                    <img src="img/5.jpeg" alt="Kenangan 5">
+                    <img src="img/5.jpeg" alt="Kenangan 5" loading="lazy" decoding="async">
                     <canvas class="scratch-canvas"></canvas>
                 </div>
                 <div class="scratch-card">
-                    <img src="img/6.jpeg" alt="Kenangan 6">
+                    <img src="img/6.jpeg" alt="Kenangan 6" loading="lazy" decoding="async">
                     <canvas class="scratch-canvas"></canvas>
                 </div>
             </div>
@@ -227,19 +229,19 @@
         <section class="slide photo-panel show-on-scroll">
             <div class="polaroid-grid">
                 <div class="polaroid">
-                    <img src="img/you.jpeg" alt="Foto Pribadi 1">
+                    <img src="img/you.jpeg" alt="Foto Pribadi 1" loading="lazy" decoding="async">
                     <p class="caption">You</p>
                 </div>
                 <div class="polaroid">
-                    <img src="img/are.jpeg" alt="Foto Pribadi 2">
+                    <img src="img/are.jpeg" alt="Foto Pribadi 2" loading="lazy" decoding="async">
                     <p class="caption">Are</p>
                 </div>
                 <div class="polaroid">
-                    <img src="img/My.jpeg" alt="Foto Pribadi 3">
+                    <img src="img/My.jpeg" alt="Foto Pribadi 3" loading="lazy" decoding="async">
                     <p class="caption">My</p>
                 </div>
                 <div class="polaroid">
-                    <img src="img/Mine.jpeg" alt="Foto Pribadi 4">
+                    <img src="img/Mine.jpeg" alt="Foto Pribadi 4" loading="lazy" decoding="async">
                     <p class="caption">Mine</p>
                 </div>
             </div>
